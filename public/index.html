@@ -12,9 +12,14 @@
     <h1>Upload and Resize Image</h1>
     <form id="uploadForm">
       <input type="file" name="image" id="imageInput" accept="image/*" required />
+      <button type="submit">Upload</button>
+    </form>
+
+    <form id="resizeForm">
+      <input type="hidden" name="imageUrl" id="imageUrlInput" />
       <input type="number" name="width" id="widthInput" placeholder="Width (px)" required />
       <input type="number" name="height" id="heightInput" placeholder="Height (px)" required />
-      <button type="submit">Upload and Resize</button>
+      <button type="submit">Resize</button>
     </form>
 
     <div id="message"></div>
@@ -35,22 +40,20 @@
         img.style.margin = '10px';
         galleryDiv.appendChild(img);
       });
-
     }
-     window.onload = loadGallery;
+    window.onload = loadGallery;
 
-    const form = document.getElementById("uploadForm");
+    const uploadForm = document.getElementById("uploadForm");
+    const resizeForm = document.getElementById("resizeForm");
     const message = document.getElementById("message");
     const result = document.getElementById("result");
 
-    form.addEventListener("submit", async (e) => {
+    uploadForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       message.textContent = "";
-      result.innerHTML = "";
+      result.innerHTML = '';
 
       const fileInput = document.getElementById("imageInput");
-      const widthInput = document.getElementById("widthInput");
-      const heightInput = document.getElementById("heightInput");
 
       if (!fileInput.files.length) {
         message.textContent = "Please select an image file.";
@@ -59,30 +62,70 @@
 
       const formData = new FormData();
       formData.append("image", fileInput.files[0]);
+
+      try {
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Upload failed");
+        }
+
+        const data = await response.json();
+
+        if (data && data.imageUrl) {
+          message.textContent = "Image uploaded successfully!";
+          document.getElementById("imageUrlInput").value = data.imageUrl;
+        } else {
+          message.textContent = "Unexpected response from server.";
+        }
+      } catch (error) {
+        message.textContent = error.message;
+      }
+    });
+
+    resizeForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      message.textContent = "";
+      result.innerHTML = '';
+
+      const imageUrlInput = document.getElementById("imageUrlInput");
+      const widthInput = document.getElementById("widthInput");
+      const heightInput = document.getElementById("heightInput");
+
+      if (!imageUrlInput.value || !widthInput.value || !heightInput.value) {
+        message.textContent = "Please fill in all fields.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("imageUrl", imageUrlInput.value);
       formData.append("width", widthInput.value);
       formData.append("height", heightInput.value);
 
       try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+        const response = await fetch("/api/resize", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
+        if (!response.ok) {
+          throw new Error("Resize failed");
+        }
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data && data.imgSrc) {
-        message.textContent = "Image uploaded and resized successfully!";
-        const img = document.createElement("img");
-        img.src = data.imgSrc;
-        img.alt = "Resized Image";
-        result.appendChild(img);
-      } else {
-        message.textContent = "Unexpected response from server.";
-      }
+        if (data && data.resizedImagePath) {
+          message.textContent = "Image resized successfully!";
+          const img = document.createElement("img");
+          img.src = data.resizedImagePath;
+          img.alt = "Resized Image";
+          result.appendChild(img);
+        } else {
+          message.textContent = "Unexpected response from server.";
+        }
       } catch (error) {
         message.textContent = error.message;
       }

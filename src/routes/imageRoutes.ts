@@ -15,17 +15,17 @@ const router = express.Router();
 
 const storage = multer.diskStorage({
 
-  destination: function (req, file, cb) {
+  destination: function (req, file, cb) {
 
-    cb(null, path.join(__dirname, '../../uploads'));
+    cb(null, path.join(__dirname, '../../uploads'));
 
-  },
+  },
 
-  filename: function (req, file, cb) {
+  filename: function (req, file, cb) {
 
-    cb(null, Date.now() + '-' + file.originalname);
+    cb(null, Date.now() + '-' + file.originalname);
 
-  },
+  },
 
 });
 
@@ -41,15 +41,15 @@ const upload = multer({ storage });
 
 router.post('/upload', upload.single('image'), (req: Request, res: Response): void => {
 
-  if (!req.file) {
+  if (!req.file) {
 
-    res.status(400).json({ error: 'No file uploaded.' });
+    res.status(400).json({ error: 'No file uploaded.' });
 
-    return;
+    return;
 
-  }
+  }
 
-  res.status(200).json({ filename: req.file.filename });
+  res.status(200).json({ filename: req.file.filename });
 
 });
 
@@ -60,27 +60,27 @@ router.post('/upload', upload.single('image'), (req: Request, res: Response): vo
 
 router.get('/gallery', (_req, res) => {
 
-  const uploadsDir = path.join(__dirname, '../../uploads');
+  const uploadsDir = path.join(__dirname, '../../uploads');
 
-  fs.readdir(uploadsDir, (err, files) => {
+  fs.readdir(uploadsDir, (err, files) => {
 
-    if (err) return res.status(500).json({ error: 'Failed to read gallery' });
-
-
-
-
-    const images = files
-
-      .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
-
-      .map((file) => `/uploads/${file}`);
+    if (err) return res.status(500).json({ error: 'Failed to read gallery' });
 
 
 
 
-    res.json(images);
+    const images = files
 
-  });
+      .filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file))
+
+      .map((file) => `/uploads/${file}`);
+
+
+
+
+    res.json(images);
+
+  });
 
 });
 
