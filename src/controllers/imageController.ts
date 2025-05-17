@@ -32,7 +32,9 @@ export const resizeImageHandler = async (req: Request, res: Response): Promise<v
 
     // If already resized image exists, send it
     if (fs.existsSync(outputPath)) {
-      res.sendFile(outputPath);
+      const buffer = await sharp(outputPath).toBuffer();
+      const imgSrc = `data:image/jpeg;base64,${buffer.toString('base64')}`;
+      res.json({ imgSrc });
       return;
     }
 
@@ -42,7 +44,9 @@ export const resizeImageHandler = async (req: Request, res: Response): Promise<v
       .toFile(outputPath);
 
     // Send the resized image
-    res.sendFile(outputPath);
+    const buffer = await sharp(outputPath).toBuffer();
+    const imgSrc = `data:image/jpeg;base64,${buffer.toString('base64')}`;
+    res.json({ imgSrc });
   } catch (error) {
     console.error('Error in resizeImageHandler:', error);
     res.status(500).send('Internal Server Error');

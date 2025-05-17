@@ -40,7 +40,9 @@ const resizeImageHandler = (req, res) => __awaiter(void 0, void 0, void 0, funct
         }
         // If already resized image exists, send it
         if (fs_1.default.existsSync(outputPath)) {
-            res.sendFile(outputPath);
+            const buffer = yield (0, sharp_1.default)(outputPath).toBuffer();
+            const imgSrc = `data:image/jpeg;base64,${buffer.toString('base64')}`;
+            res.json({ imgSrc });
             return;
         }
         // Resize and save the image
@@ -48,7 +50,9 @@ const resizeImageHandler = (req, res) => __awaiter(void 0, void 0, void 0, funct
             .resize(width, height)
             .toFile(outputPath);
         // Send the resized image
-        res.sendFile(outputPath);
+        const buffer = yield (0, sharp_1.default)(outputPath).toBuffer();
+        const imgSrc = `data:image/jpeg;base64,${buffer.toString('base64')}`;
+        res.json({ imgSrc });
     }
     catch (error) {
         console.error('Error in resizeImageHandler:', error);

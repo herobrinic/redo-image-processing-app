@@ -20,8 +20,25 @@
     <div id="message"></div>
     <div id="result"></div>
   </div>
+  <div id="gallery"></div>
 
   <script>
+    async function loadGallery() {
+      const response = await fetch('/api/images/gallery');
+      const images = await response.json();
+      const galleryDiv = document.getElementById('gallery');
+      galleryDiv.innerHTML = ''; // مسح أي صور قديمة
+      images.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.width = '100px';
+        img.style.margin = '10px';
+        galleryDiv.appendChild(img);
+      });
+
+    }
+     window.onload = loadGallery;
+
     const form = document.getElementById("uploadForm");
     const message = document.getElementById("message");
     const result = document.getElementById("result");
@@ -46,26 +63,26 @@
       formData.append("height", heightInput.value);
 
       try {
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-        if (!response.ok) {
-          throw new Error("Upload failed");
-        }
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (data && data.resizedImagePath) {
-          message.textContent = "Image uploaded and resized successfully!";
-          const img = document.createElement("img");
-          img.src = data.resizedImagePath;
-          img.alt = "Resized Image";
-          result.appendChild(img);
-        } else {
-          message.textContent = "Unexpected response from server.";
-        }
+      if (data && data.imgSrc) {
+        message.textContent = "Image uploaded and resized successfully!";
+        const img = document.createElement("img");
+        img.src = data.imgSrc;
+        img.alt = "Resized Image";
+        result.appendChild(img);
+      } else {
+        message.textContent = "Unexpected response from server.";
+      }
       } catch (error) {
         message.textContent = error.message;
       }
