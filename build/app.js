@@ -22,4 +22,8 @@ app.use(express_1.default.static(path_1.default.join(__dirname, '../public')));
 // app.get('*', (_req, res) => {
 //   res.sendFile(path.join(__dirname, '../public/index.html'));
 // });
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server listening on http://localhost:${PORT}`);
+});
 exports.default = app;
