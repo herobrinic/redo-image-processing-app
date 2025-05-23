@@ -68,12 +68,13 @@ npm install
 
 
 
-## Or build and run:
+## build and run:
 npm run build
 npm start
 
 
-## DONT USE npm run dev !
+## Or
+ npm run dev 
 
 
 ## Visit the app
